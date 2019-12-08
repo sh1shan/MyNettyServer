@@ -1,2 +1,2 @@
-# MyNettyServer
-NettyServer是基于netty的服务
+# MyXXXXServer
+XXXXServer是基于XXXX的服务
