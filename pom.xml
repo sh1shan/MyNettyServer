@@ -23,7 +23,7 @@
         <skipTests>true</skipTests>
         <commons-dbutils.version>1.6</commons-dbutils.version>
         <hbase-client.version>1.2.0-cdh5.14.4</hbase-client.version>
-        <hadoop.version>2.6.0-cdh5.14.4</hadoop.version>
+        <hadoop.version>12.6.0-cdh5.14.4</hadoop.version>
     </properties>
     <!--    =========================================properties end=====================================================  -->
 
@@ -193,7 +193,7 @@
 
         <dependency>
             <groupId>commons-dbutils</groupId>
-            <artifactId>hbase-client</artifactId>
+            <artifactId>commons-dbutils</artifactId>
             <version>${commons-dbutils.version}</version>
         </dependency>
 
@@ -248,6 +248,19 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!-- log -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+
     </dependencies>
     <!--========================================dependencies end========================================================  -->
 
