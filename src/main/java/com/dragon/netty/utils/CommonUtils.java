@@ -2,6 +2,7 @@ package com.dragon.netty.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dragon.netty.helper.CommonService;
 import io.netty.handler.codec.http.HttpRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static com.dragon.netty.utils.LogShield.logOperate;
 
 /**
  * 通用工具类
@@ -146,7 +149,7 @@ public class CommonUtils {
      * @param policyTime
      * @return
      */
-    public static JSONObject policy(HttpRequest request, List<String> mustField, List<String> shouldField, CommonService commonService, String requestPath, long timeout) {
+    public static JSONObject policy(HttpRequest request, List<String> mustField, List<String> shouldField, CommonService commonService, String requestPath, long timeout,long policyTime) {
         JSONObject resp;
         String uri = URLDecoder.decode(request.getUri());
         logger.info("接收到的uri为{}", logOperate(uri));
@@ -180,7 +183,7 @@ public class CommonUtils {
         }
         long stormStart = System.currentTimeMillis();
         String url = getRequestUrl(commonService, requestPath);
-        String result = conmonService.getPostResponse(url, sendMessage.toString());
+        String result = commonService.getPostResponse(url, sendMessage.toString());
         if (logger.isDebugEnabled()) {
             logger.debug("请求Storm消耗的时间【{}】ms", policyTime);
             logger.debug("2.决策返回的数据：{}", result);
@@ -214,14 +217,7 @@ public class CommonUtils {
         logger.info("请求storm消耗时间:{}ms", System.currentTimeMillis());
     }
 
-    /**
-     * 日志操作
-     *
-     * @param uri
-     */
-    public static String logOperate(String uri) {
-        return null;
-    }
+
 
     /**
      * HBase 请求参数校验
@@ -234,7 +230,7 @@ public class CommonUtils {
         JSONObject resp = new JSONObject();
         if (null == paramMap || paramMap.isEmpty()) {
             logger.warn("参数异常有误，请求结束");
-            resp = ParamNotExistReturn("params");
+            resp = paramNotExistReturn("params");
             return resp;
 
         }
@@ -282,25 +278,29 @@ public class CommonUtils {
     }
 
     /**
-     * 获取参考书剑距离现在的毫秒数
+     * 获取参考时间距离现在的毫秒数
      *
      * @param referMills
      * @return
      */
     public static long awayCurrentMills(long referMills) {
-        return System.currentTimeMillis() - referMills
+        return System.currentTimeMillis() - referMills;
     }
 
-    public static void closees(ICloseable... closers) {
-        Arrays.stream(closers).forEach(closer)->{
-            if (closer != null) {
-                String name = closers.getClass().getSimpleName();
-                try {
-                    closer.close();
-                } catch (Exception e) {
-                    logger.info("[{}]关闭发生异常，异常信息：{}", name, e.getMessage(), e);
-                }
-            }
-        }
-    }
+//    /**
+//     * 关闭多个closeable接口实现类对象
+//     * @param closers
+//     */
+//    public static void closees(ICloseable... closers) {
+//        Arrays.stream(closers).forEach(closer->{
+//            if (closer != null) {
+//                String name = closers.getClass().getSimpleName();
+//                try {
+//                    closer.close();
+//                } catch (Exception e) {
+//                    logger.info("[{}]关闭发生异常，异常信息：{}", name, e.getMessage(), e);
+//                }
+//            }
+//        })
+//    }
 }
