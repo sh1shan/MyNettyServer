@@ -1,10 +1,12 @@
 package com.dragon.netty.utils;
 
+
+
 public class LogShield {
     /**
-     * 日志操作
+     * 日志脱敏
      *
-     * @param uri
+     * @param uri 需要脱敏的字符串
      */
     public static String logOperate(String uri) {
         return null;

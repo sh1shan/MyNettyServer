@@ -3,6 +3,7 @@ package com.dragon.netty.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dragon.netty.helper.CommonService;
+import com.dragon.netty.helper.interfaces.ICloseable;
 import io.netty.handler.codec.http.HttpRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -287,20 +288,20 @@ public class CommonUtils {
         return System.currentTimeMillis() - referMills;
     }
 
-//    /**
-//     * 关闭多个closeable接口实现类对象
-//     * @param closers
-//     */
-//    public static void closees(ICloseable... closers) {
-//        Arrays.stream(closers).forEach(closer->{
-//            if (closer != null) {
-//                String name = closers.getClass().getSimpleName();
-//                try {
-//                    closer.close();
-//                } catch (Exception e) {
-//                    logger.info("[{}]关闭发生异常，异常信息：{}", name, e.getMessage(), e);
-//                }
-//            }
-//        })
-//    }
+    /**
+     * 关闭多个closeable接口实现类对象
+     * @param closers
+     */
+    public static void closees(ICloseable... closers) {
+        Arrays.stream(closers).forEach(closer->{
+            if (closer != null) {
+                String name = closers.getClass().getSimpleName();
+                try {
+                    closer.close();
+                } catch (Exception e) {
+                    logger.info("[{}]关闭发生异常，异常信息：{}", name, e.getMessage(), e);
+                }
+            }
+        });
+    }
 }
