@@ -107,25 +107,25 @@
     <!--    =========================================dependencies start=================================================  -->
     <dependencies>
         <!-- netty server-->
-        <dependency>
-            <groupId>jrx.anyest</groupId>
-            <artifactId>netty-server</artifactId>
-            <version>1.4.0</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>log4j-api</artifactId>
-                    <groupId>org.apache.logging.log4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>log4j-to-slf4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>fastjson</artifactId>
-                    <groupId>com.alibaba</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>jrx.anyest</groupId>-->
+            <!--<artifactId>netty-server</artifactId>-->
+            <!--<version>1.4.0</version>-->
+            <!--<exclusions>-->
+                <!--<exclusion>-->
+                    <!--<artifactId>log4j-api</artifactId>-->
+                    <!--<groupId>org.apache.logging.log4j</groupId>-->
+                <!--</exclusion>-->
+                <!--<exclusion>-->
+                    <!--<groupId>org.apache.logging.log4j</groupId>-->
+                    <!--<artifactId>log4j-to-slf4j</artifactId>-->
+                <!--</exclusion>-->
+                <!--<exclusion>-->
+                    <!--<artifactId>fastjson</artifactId>-->
+                    <!--<groupId>com.alibaba</groupId>-->
+                <!--</exclusion>-->
+            <!--</exclusions>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>commons-collections</groupId>
