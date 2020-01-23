@@ -4,6 +4,8 @@ import com.dragon.netty.helper.interfaces.*;
 import com.dragon.netty.helper.watchers.*;
 import com.dragon.netty.utils.PropertyUtils;
 import com.dragon.netty.utils.ZKClient;
+import com.sun.org.apache.regexp.internal.RE;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,7 +112,6 @@ public class ZkAddressHelper implements IInitable, ICloseable, IAnswerService, I
                     closeZkClient();
                     initZkClient();
                 }
-
             } else {
                 logger.warn("未匹配传入监听器[{}]", watcher.getClass().getSimpleName());
             }
@@ -118,8 +119,6 @@ public class ZkAddressHelper implements IInitable, ICloseable, IAnswerService, I
         } else {
             logger.warn("传入监听器为null");
         }
-
-
     }
 
     /**
@@ -300,9 +299,14 @@ public class ZkAddressHelper implements IInitable, ICloseable, IAnswerService, I
         return (null == zkClient);
     }
 
-
+    /**
+     * 关闭方法
+     */
     @Override
     public void close() {
+        closees(urlWatcher, clientWatcher, emptyWatcher);
+        closeZkClient();
+        logger.info("[{}]关闭！", this.getClass().getSimpleName());
 
     }
 
@@ -330,7 +334,51 @@ public class ZkAddressHelper implements IInitable, ICloseable, IAnswerService, I
     @Override
     public void loadConfig() {
         this.zkConnAddress = PropertyUtils.getProp(CONF_ZOOKEEPER_ADDRESS);
+    }
 
+    private void putUrlTopoQue(String url) {
+        if (!this.urlQue.offer(url)) {
+            logger.debug("放入url到监听队列失败：队列已满！");
+        }
+    }
+
+    /**
+     * 随机获取地址
+     * 重试多次
+     */
+    String getRandomUrl() {
+        String url = StringUtils.EMPTY;
+        int retryTime = 0;
+        while (StringUtils.isBlank(url) && retryTime < RETRY_MAX_TIME) {
+            retryTime++;
+            url = getUrlFromList();
+            if (StringUtils.isBlank(url)) {
+                threadSleep(RETRY_SLEEP_MILLS);
+            }
+        }
+        if (StringUtils.isBlank(url)) {
+            logger.info("重试[{}]次后获取拓扑url仍为空！", RETRY_MAX_TIME);
+        } else {
+            //监听url
+            putUrlTopoQue(url);
+        }
+        return url;
+    }
+
+    private String getUrlFromList() {
+        String url = StringUtils.EMPTY;
+        try {
+            if (!topoUrlList.isEmpty()) {
+                SecureRandom ramdom = new SecureRandom();
+                //在重新加载杜族瞬间，可能数组越界！
+                url = topoUrlList.get(ramdom.nextInt(topoUrlList.size()));
+            } else {
+                logger.warn("获取拓扑地址失败：地址列表为空，请检查zkClient是否初始化！");
+            }
+        } catch (Exception e) {
+            logger.warn("获取拓扑地址发生异常，请检查是否正在更新，异常信息:" + e.getMessage(), e);
+        }
+        return url;
     }
 
 }
