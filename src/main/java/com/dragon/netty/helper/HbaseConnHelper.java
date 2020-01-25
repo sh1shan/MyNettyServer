@@ -10,15 +10,15 @@ import com.dragon.netty.helper.watchers.WatchThreadPool;
 import com.dragon.netty.utils.HBaseUtils;
 import com.dragon.netty.utils.PropertyUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.hadoop.hbase.client.Connection;
 
 import java.util.Objects;
 
 public class HbaseConnHelper implements IInitable, Iloadable, ICloseable, IAnswerService {
-    private static final Logger logger= LoggerFactory.getLogger(HbaseConnHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(HbaseConnHelper.class);
 
     //调度线程池
     private final WatchThreadPool watchPool;
@@ -44,17 +44,30 @@ public class HbaseConnHelper implements IInitable, Iloadable, ICloseable, IAnswe
     //hbase认证监听器
     private HBaseConnWatcher connWatcher;
 
-    public HbaseConnHelper(WatchThreadPool _watchPool){
-        this.watchPool=_watchPool;
+    public HbaseConnHelper(WatchThreadPool _watchPool) {
+        this.watchPool = _watchPool;
     }
 
     @Override
     public void initWatchers() {
+        if (useKerberos && reloginInited){
+            this.connWatcher=new HBaseConnWatcher(this,this.reloginHours);
+            connWatcher.init();
+            watchPool.init();
+            watchPool.addRunner(connWatcher);
+            logger.info("hbase认证监听器启动成功！");
+        }else {
+            logger.info("hbase连接未开启认证或者监听器启动标志不为true，不启动监听器！");
+        }
 
     }
 
     @Override
-    public void answerAndOperate(IWatchable watchable) {
+    public void answerAndOperate(IWatchable watcher) {
+        if (null !=watcher){
+            String watcherName=watcher.getClass().getSimpleName();
+            logger.info("接收到监听器[{}]通知 ");
+        }
 
     }
 
@@ -72,14 +85,27 @@ public class HbaseConnHelper implements IInitable, Iloadable, ICloseable, IAnswe
     }
 
     private void initConn() {
-        if ()
+        if (useKerberos) {
+            this.ugi = HBaseUtils.confirkerberos(conf);
+        }
+        this.hbaseConn = HBaseUtils.initHbaseConf();
     }
 
     @Override
     public void loadConfig() {
-        this.useKerberos= Objects.equals(PropertyUtils.getProp("kerberos.open"),"true");
-        this.reloginInited=Objects.equals(PropertyUtils.getProp("hbase.relogin.watch.init"),"true");
+        //初始化hbase信息
+        this.useKerberos = Objects.equals(PropertyUtils.getProp("kerberos.open"), "true");
+        this.reloginInited = Objects.equals(PropertyUtils.getProp("hbase.relogin.watch.init"), "true");
         this.reloginHours = Integer.parseInt(PropertyUtils.getProp("hbase.relogin.interval.hour"));
-        this.conf=(useKerberos? HBaseUtils.initHbaseConfKerberos():HBaseUtils.initHbaseConf());
+        this.conf = (useKerberos ? HBaseUtils.initHbaseConfKerberos() : HBaseUtils.initHbaseConf());
+    }
+
+    /**
+     * 获取hbase连接
+     *
+     * @return
+     */
+    Connection getHbaseConn() {
+        return hbaseConn;
     }
 }
