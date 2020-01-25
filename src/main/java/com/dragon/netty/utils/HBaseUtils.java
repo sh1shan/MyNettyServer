@@ -31,7 +31,7 @@ public class HBaseUtils {
     public static Configuration initHbaseConf() {
         Configuration conf = null;
         try {
-            conf = HBaseConfiguration.creat();
+//            conf = HBaseConfiguration.creat();
             normalConf(conf);
             logger.info("hbase连接初始化配置成功！");
         } catch (Exception e) {
@@ -168,7 +168,7 @@ public class HBaseUtils {
         Table table = null;
         Result[] result = null;
         try {
-            table = hbaseConnection.getTable(TableName.valueOf(tableName));
+//            table = hbaseConnection.getTable(TableName.valueOf(tableName));
         } catch (Exception e) {
             logger.error("hbase查询异常：" + e.getMessage(), e);
         } finally {

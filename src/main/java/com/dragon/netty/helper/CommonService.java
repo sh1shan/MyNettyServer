@@ -77,7 +77,7 @@ public class CommonService implements IInitable, ICloseable {
     }
 
     /**
-     * 获取redis缓存表明
+     * 获取redis缓存表名
      */
     public String getRedisTableName(String name) {
         return redisCacheHelper.getMappingValue(name);
@@ -106,6 +106,5 @@ public class CommonService implements IInitable, ICloseable {
             logger.warn("watchPool关闭异常：watchPool为null!");
         }
     }
-
 
 }

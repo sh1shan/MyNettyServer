@@ -15,6 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.hbase.client.Connection;
 
+import static com.dragon.netty.utils.CommonUtils.closees;
+
+import java.io.IOException;
 import java.util.Objects;
 
 public class HbaseConnHelper implements IInitable, Iloadable, ICloseable, IAnswerService {
@@ -50,13 +53,13 @@ public class HbaseConnHelper implements IInitable, Iloadable, ICloseable, IAnswe
 
     @Override
     public void initWatchers() {
-        if (useKerberos && reloginInited){
-            this.connWatcher=new HBaseConnWatcher(this,this.reloginHours);
+        if (useKerberos && reloginInited) {
+            this.connWatcher = new HBaseConnWatcher(this, this.reloginHours);
             connWatcher.init();
             watchPool.init();
             watchPool.addRunner(connWatcher);
             logger.info("hbase认证监听器启动成功！");
-        }else {
+        } else {
             logger.info("hbase连接未开启认证或者监听器启动标志不为true，不启动监听器！");
         }
 
@@ -64,16 +67,37 @@ public class HbaseConnHelper implements IInitable, Iloadable, ICloseable, IAnswe
 
     @Override
     public void answerAndOperate(IWatchable watcher) {
-        if (null !=watcher){
-            String watcherName=watcher.getClass().getSimpleName();
-            logger.info("接收到监听器[{}]通知 ");
+        if (null != watcher) {
+            String watcherName = watcher.getClass().getSimpleName();
+            logger.info("接收到监听器[{}]通知 ", watcherName);
+            if (watcherName.equals(connWatcher)) {
+                HBaseUtils.reConfirKerberos(ugi);
+            } else {
+                logger.warn("未匹配监听器：[{}]", watcherName);
+            }
+            logger.info("响应监听器[{}]通知完毕", watcherName);
+        } else {
+            logger.warn("传入监听器为null");
         }
 
     }
 
     @Override
     public void close() {
+        closees(connWatcher);
+        closeHbaseConn();
+    }
 
+    private void closeHbaseConn() {
+        if (null != hbaseConn) {
+            try {
+                hbaseConn.close();
+            } catch (IOException e) {
+                logger.warn("关闭hbase连接异常！异常信息：[{}]", e.getMessage(), e);
+            }
+        } else {
+            logger.warn("hbase连接关闭失败：连接为null");
+        }
     }
 
     @Override
@@ -88,7 +112,7 @@ public class HbaseConnHelper implements IInitable, Iloadable, ICloseable, IAnswe
         if (useKerberos) {
             this.ugi = HBaseUtils.confirkerberos(conf);
         }
-        this.hbaseConn = HBaseUtils.initHbaseConf();
+//        this.hbaseConn = HBaseUtils.initHbaseConf();
     }
 
     @Override
